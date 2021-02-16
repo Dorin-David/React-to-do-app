@@ -1,0 +1,90 @@
+/*import Roboto Mono font from Google API*/
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&display=swap');
+
+.card {
+    width: 80%;
+    margin: 10px auto;
+    padding: 5px 15px;
+    border-radius: 4px;
+    font-family: 'Roboto Mono', monospace;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    overflow-wrap: anywhere; 
+}
+
+
+.card.green {
+    border: 3px solid rgb(97, 218, 97);
+    border-left: 7px solid green;
+}
+
+.card.yellow {
+    border: 3px solid rgb(228, 225, 52);
+    border-left: 7px solid yellow;
+}
+
+.card.red {
+    border: 3px solid rgb(228, 89, 65);
+    border-left: 7px solid red;
+}
+/* 
+.card.green .task-info {
+    color: rgb(38, 196, 33);
+}
+
+
+.card.card.yellow .task-info {
+    color: rgb(199, 199, 22);
+}
+
+.card.red .task-info {
+    color: rgb(197, 31, 31);
+} */
+
+.card.done {
+    border: 3px solid #4b4848;
+    border-left: 7px solid #2c2b2b;
+}
+
+.task-info {
+    display: inline-block;
+    font-size: 1.2rem;
+    color: #302d2d;
+    margin-right: 10px;
+}
+
+ .task-manager {
+  font-size: 1.8rem;
+  opacity: .9;
+}
+
+.task-manager:hover {
+    cursor: pointer;
+    opacity: 1;
+}
+
+.task-done {
+    color:rgb(76, 216, 76);
+}
+
+.card.done .task-info {
+    text-decoration: line-through #2c2b2b 2px;
+}
+
+.card.done .task-done {
+    color: #2c2b2b;
+}
+
+.delete-task {
+    color: rgb(228, 89, 65);
+}
+
+.edit-task {
+    color: royalblue;
+}
+
+ .btn-wrapper {
+    flex: 0 0 100px;
+}
+

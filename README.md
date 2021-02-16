@@ -1,4 +1,6 @@
-# Getting Started with Create React App
+# Simple  Coloured To Do (or Not T0 DO) List
+
+A simple, responsive To Do List built using React. You can add, edit and remove items from the list. Each time you add a new item to the list you have to pick a color: either green, yellow or red. How you interpret the colors it's up to you. Could be the order of importance and urgency, or could be the level of *danger* of the task (I'd mark 'Eat pizza after midnight' as red).
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
