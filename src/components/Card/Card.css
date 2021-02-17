@@ -28,19 +28,6 @@
     border: 3px solid rgb(228, 89, 65);
     border-left: 7px solid red;
 }
-/* 
-.card.green .task-info {
-    color: rgb(38, 196, 33);
-}
-
-
-.card.card.yellow .task-info {
-    color: rgb(199, 199, 22);
-}
-
-.card.red .task-info {
-    color: rgb(197, 31, 31);
-} */
 
 .card.done {
     border: 3px solid #4b4848;

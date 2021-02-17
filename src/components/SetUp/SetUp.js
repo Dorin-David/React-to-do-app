@@ -83,15 +83,19 @@ class SetUp extends React.Component {
        return this.state.filteredItems.includes(target) ? style : null
     }
 
-    clearAll = () => {
-      this.setState({list: []})
+    clearList = (command) => {
+      if(command === 'done'){
+        this.setState({list: [...this.state.list].filter(el => el.color !== 'done')})
+      } else {
+        this.setState({list: []})
+      }
     }
     
     render(){
       return (
         <div >
         <div className='interaction-wrapper'> 
-           <input type='text' maxlength="40" placeholder="New Task (max 25 characters)" onChange={this.handleChange} value={this.state.currentTask}></input>
+           <input type='text' placeholder="Add new task" onChange={this.handleChange} value={this.state.currentTask}></input>
            {this.state.hideAdd ? null : <button onClick={this.toggleButtons}>Add</button>}
          
            {this.state.hideSemaphore ? null :
@@ -108,7 +112,8 @@ class SetUp extends React.Component {
          editTask={this.editTask}
          deleteTask={this.deleteTask}
          />
-         <button className='clear-all' onClick={this.clearAll}>Clear Items</button>
+         <button className='clear-all' onClick={() => this.clearList('all')}>Clear All</button>
+         <button className='clear-done' onClick={() => this.clearList('done')}>Clear Done</button>
       </div>
     )
     }
