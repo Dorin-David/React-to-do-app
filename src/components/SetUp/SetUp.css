@@ -8,7 +8,6 @@
 
 .interaction-wrapper input {
     flex: 2 0 80%;
-    /* height: 25px; */
     border: 2px solid lightblue;
     border-radius: 3px;
     padding: 5px 10px;
@@ -65,22 +64,38 @@
     opacity: 1;
 }
 
-.clear-all {
+
+.clear-all, .clear-done {
     display: block;
     margin: auto;
+    width: 120px;
     margin-top: 100px;
-    border: 2px solid rgb(219, 34, 1);
     border-radius: 3px;
     padding: 10px;
-    color: rgb(226, 50, 19);
     font-size: 1rem;
     font-weight: bold;
+}
+
+.clear-all {
+    border: 2px solid rgb(219, 34, 1);
+    color: rgb(226, 50, 19);
+}
+
+.clear-done {
+    border: 2px solid #4b4848;
+    color: #302d2d;
+    margin-top: 10px;
 }
 
 .clear-all:hover {
     cursor: pointer;
     color: white;
     background: rgb(228, 89, 65);
+}
+.clear-done:hover {
+    cursor: pointer;
+    color: white;
+    background: #302d2d;
 }
 
 @media screen and (max-width: 610px) {
