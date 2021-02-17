@@ -1,0 +1,44 @@
+/*import Roboto Mono font from Google API*/
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&display=swap');
+
+
+.filter-wrapper {
+    width: 250px;
+    border-bottom: 1px solid gray;
+    margin-left: 20%;
+    display: flex;
+    justify-content: space-around;
+}
+
+.filter-wrapper h4 {
+    margin: 0;
+    font-family: 'Roboto Mono', monospace;
+    color: #4b4848;
+}
+
+.filter-wrapper > div {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    opacity: .8;
+}
+.filter-wrapper > div:hover {
+    cursor: pointer;
+    opacity: 1;
+}
+
+#green-filter {
+    background-color: green;
+}
+
+#yellow-filter {
+    background: yellow;
+}
+
+#red-filter {
+    background: red;
+}
+
+#done-filter {
+    background: #4b4848;
+}

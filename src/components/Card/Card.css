@@ -84,6 +84,12 @@
     color: royalblue;
 }
 
+/*Rule for hidding items with filter*/
+.card.hidden {
+    display: none;
+}
+
+
  .btn-wrapper {
     flex: 0 0 100px;
 }
