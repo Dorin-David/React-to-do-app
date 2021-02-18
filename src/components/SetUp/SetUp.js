@@ -1,33 +1,46 @@
-import React from 'react'
-import Card from '../Card/Card'
-import Filter from '../Filter/Filter'
+import React, {Component, Fragment} from 'react';
+import Card from '../Card/Card';
+import Filter from '../Filter/Filter';
+import Semaphore from '../Semaphore/Semaphore';
+import Buttons from '../Buttons/Buttons';
 import './SetUp.css'
 
-class SetUp extends React.Component {
+class SetUp extends Component {
     state = {
       list: [],
+      filteredItems: [],
+      toRenderList: [],
       currentTask: '',
       hideAdd: false,
       hideSemaphore: true,
-      filteredItems: [],
-      toRenderList: []
+      warningMessage: false
+      
     }
   
     toggleButtons = () => {
-      this.setState({
-        hideAdd: !this.state.hideAdd,
-        hideSemaphore: !this.state.hideSemaphore
-      })
+      this.setState(state => ({
+        hideAdd: !state.hideAdd,
+        hideSemaphore: !state.hideSemaphore
+      }))
+    }
+
+    validateInput = () => {
+      if(this.state.list.find(el => el.info === this.state.currentTask.trim())){
+        this.setState({warningMessage: true})
+        setTimeout(() => this.setState({warningMessage: false}), 1500)
+        return
+      }
+      this.toggleButtons()
     }
 
     addTOList = (color) => {
-      let currentTask = this.state.currentTask;
+      let currentTask = this.state.currentTask.trim();
        if(this.state.list.find(element => element.info === currentTask) || currentTask === '')  {this.toggleButtons();  return this.setState({currentTask: ''})}
-       this.setState({
-         list: [...this.state.list, {info: currentTask, color: color}],
-         currentTask: '',
-         toRenderList: [this.state.list, {info: currentTask, color: color}]
-       })
+       this.setState(state => ({
+        list: [...state.list, {info: currentTask, color: color}],
+        currentTask: '',
+        toRenderList: [state.list, {info: currentTask, color: color}]
+      }))
        this.toggleButtons()
     }
 
@@ -45,10 +58,10 @@ class SetUp extends React.Component {
         currentFilteredItems = [...currentFilteredItems, target]
       }
 
-      this.setState({
+      this.setState(state => ({
         filteredItems: currentFilteredItems,
-        toRenderList: [...this.state.list].filter(el => currentFilteredItems.includes(el.color))
-      })
+        toRenderList: [...state.list].filter(el => currentFilteredItems.includes(el.color))
+      }))
     }
 
     markAsDone = (target) => {
@@ -68,14 +81,14 @@ class SetUp extends React.Component {
     editTask = (target) => {
       this.deleteTask(target)
       this.setState({
-        currentTask: target
+        currentTask: target.trim()
       })
     }
 
     deleteTask = (target) => {
-      this.setState({
-        list: [...this.state.list].filter(item => item.info !== target)
-      })
+      this.setState(state => ({
+        list: [...state.list].filter(item => item.info !== target)
+      }))
     }
 
     styleProp = (target) => {
@@ -85,7 +98,7 @@ class SetUp extends React.Component {
 
     clearList = (command) => {
       if(command === 'done'){
-        this.setState({list: [...this.state.list].filter(el => el.color !== 'done')})
+        this.setState(state => ({list: [...state.list].filter(el => el.color !== 'done')}))
       } else {
         this.setState({list: []})
       }
@@ -93,28 +106,21 @@ class SetUp extends React.Component {
     
     render(){
       return (
-        <div >
+        <Fragment >
         <div className='interaction-wrapper'> 
-           <input type='text' placeholder="Add new task" onChange={this.handleChange} value={this.state.currentTask}></input>
-           {this.state.hideAdd ? null : <button onClick={this.toggleButtons}>Add</button>}
-         
-           {this.state.hideSemaphore ? null :
-           <div className='semaphore'>
-           <div id='green' onClick={() => this.addTOList('green')}></div>
-           <div id='yellow' onClick={() => this.addTOList('yellow')}></div>
-           <div id='red' onClick={() => this.addTOList('red')}></div>
-         </div>}
+           <input type='text' placeholder="Add new task" 
+           onChange={this.handleChange} 
+           value={this.state.warningMessage ? 'Task already in list' : this.state.currentTask} 
+           style={this.state.warningMessage ? {border: '3px solid red', color: 'tomato', fontWeight: 'bold'} : null}
+           />
+           {this.state.hideAdd ? null : <button onClick={ this.validateInput}>Add</button>}
+           {this.state.hideSemaphore ? null : <Semaphore addTOList={this.addTOList}/> }
         </div>
          {this.state.list.length >= 1 ? <Filter filterItems={this.filterItems} style={this.styleProp}/> : null}
-         <Card 
-         list={this.state.filteredItems.length === 0 ? this.state.list : this.state.toRenderList}
-         markAsDone={this.markAsDone}
-         editTask={this.editTask}
-         deleteTask={this.deleteTask}
-         />
-         <button className='clear-all' onClick={() => this.clearList('all')}>Clear All</button>
-         <button className='clear-done' onClick={() => this.clearList('done')}>Clear Done</button>
-      </div>
+         <Card  list={this.state.filteredItems.length === 0 ? this.state.list : this.state.toRenderList}
+         markAsDone={this.markAsDone} editTask={this.editTask}  deleteTask={this.deleteTask} />
+         {this.state.list.length >= 1 ?  <Buttons clearList={this.clearList}/> : <h2>Add some great stuff!</h2>}
+      </Fragment>
     )
     }
 }

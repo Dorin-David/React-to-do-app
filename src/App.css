@@ -25,3 +25,10 @@ body {
     color: royalblue;
     text-decoration: underline solid 2px;
 }
+
+.main-wrapper h2 {
+    text-align: center;
+    font-family: 'Roboto Mono', monospace;
+    color: #4b4848;
+    margin-top: 40px;
+}
