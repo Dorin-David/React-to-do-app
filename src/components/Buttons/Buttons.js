@@ -1,4 +1,5 @@
-import React, {Fragment} from 'react'
+import React, {Fragment} from 'react';
+import './Buttons.css'
 
 const buttons = props => <Fragment>
                             <button className='clear-all' onClick={() => props.clearList('all')}>Clear All</button>

@@ -1,0 +1,31 @@
+.semaphore {
+    flex: 0 1 110px;
+    display: inline-flex;
+    justify-content: space-around;
+}
+
+.semaphore > div {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    border-radius: 15px;
+    border: 1px solid lightgray;
+    opacity: 0.9;
+}
+
+#green {
+    background: green;
+}
+
+#yellow {
+    background: yellow;
+}
+
+#red {
+    background: red;
+}
+
+.semaphore > div:hover {
+    cursor: pointer;
+    opacity: 1;
+}
