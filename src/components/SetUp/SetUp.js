@@ -119,8 +119,11 @@ class SetUp extends Component {
           {this.state.hideSemaphore ? null : <Semaphore addTOList={this.addTOList} />}
         </div>
         {this.state.list.length >= 1 ? <Filter filterItems={this.filterItems} style={this.styleProp} /> : null}
-        <Card list={this.state.filteredItems.length === 0 ? this.state.list : this.state.toRenderList}
-          markAsDone={this.markAsDone} editTask={this.editTask} deleteTask={this.deleteTask} />
+        <Card 
+          list={this.state.filteredItems.length === 0 ? this.state.list : this.state.toRenderList}
+          markAsDone={this.markAsDone} 
+          editTask={this.editTask} 
+          deleteTask={this.deleteTask} />
         {this.state.list.length >= 1 ? <Buttons clearList={this.clearList} /> : <h2>Add some great stuff!</h2>}
       </Fragment>
     )
