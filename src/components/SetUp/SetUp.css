@@ -32,6 +32,8 @@
    border: 2px solid var(--blue-cadet);
    color: white;
 }
+
+/*from down below, semaphore*/
 .interaction-wrapper .semaphore {
     flex: 0 1 110px;
     display: inline-flex;
