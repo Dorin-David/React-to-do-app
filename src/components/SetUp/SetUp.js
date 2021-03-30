@@ -3,6 +3,7 @@ import Card from '../Card/Card';
 import Filter from '../Filter/Filter';
 import Semaphore from '../Semaphore/Semaphore';
 import Buttons from '../Buttons/Buttons';
+
 import './SetUp.css';
 
 
@@ -94,7 +95,6 @@ const SetUp = props => {
       setList([])
     }
   }
-
 
   return (
     <Fragment >

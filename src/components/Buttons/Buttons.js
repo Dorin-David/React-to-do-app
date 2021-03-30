@@ -1,9 +1,16 @@
 import React, {Fragment} from 'react';
-import './Buttons.css'
+import Button from '../UI/Button/button';
+import './Buttons.css';
 
 const buttons = props => <Fragment>
-                            <button className='clear-all' onClick={() => props.clearList('all')}>Clear All</button>
-                            <button className='clear-done' onClick={() => props.clearList('done')}>Clear Done</button>
+                            <Button 
+                            className='clear-all' 
+                            click={() => props.clearList('all')}
+                            >Clear All</Button>
+                            <Button
+                            className='clear-done' 
+                            click={() => props.clearList('done')}
+                            >Clear Done</Button>
                          </Fragment>
 
 export default buttons
