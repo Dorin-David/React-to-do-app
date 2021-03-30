@@ -1,8 +1,9 @@
 import React, { Fragment, useState } from 'react';
 import Card from '../Card/Card';
-import Filter from '../Filter/Filter';
+import FilterButtons from '../Filter/Filter';
 import Semaphore from '../Semaphore/Semaphore';
 import Buttons from '../Buttons/Buttons';
+import ErrorModal from '../UI/ErrorModal/ErrorModal';
 
 import './SetUp.css';
 
@@ -14,7 +15,8 @@ const SetUp = props => {
   const [currentTask, setCurrentTask] = useState('');
   const [list, setList] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
-  const [toRenderList, setToRenderList] = useState([])
+  const [toRenderList, setToRenderList] = useState([]);
+  const [error, setError] = useState('')
 
   const toggleButtons = () => {
     setButtons(state => ({
@@ -98,6 +100,7 @@ const SetUp = props => {
 
   return (
     <Fragment >
+      {error && <ErrorModal closeModal={() => setError('')}/>}
       <div className='interaction-wrapper'>
         <input type='text' placeholder="Add new task"
           onChange={handleChange}
@@ -107,7 +110,7 @@ const SetUp = props => {
         {buttons.hideAdd ? null : <button onClick={validateInput}>Add</button>}
         {buttons.hideSemaphore ? null : <Semaphore addTOList={addTOList} />}
       </div>
-      {list.length >= 1 ? <Filter filterItems={filterItems} style={styleProp} /> : null}
+      {list.length >= 1 ? <FilterButtons filterItems={filterItems} style={styleProp} /> : null}
       <Card
         list={filteredItems.length === 0 ? list : toRenderList}
         markAsDone={markAsDone}

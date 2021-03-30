@@ -4,7 +4,7 @@
 
 body, html {
     width: 100%;
-    height: 100%;
+    overflow-x: hidden;
 }
 
 body {
@@ -15,19 +15,18 @@ body {
     width: 100%;
     height: 100%;
     position: relative;
-    padding: 5px;
+    padding-top: 5px;
 }
 
 .main-wrapper {
     width: 90%;
     min-height: 300px;
-    margin: 100px auto;
+    margin: 50px auto 0 auto;
 }
 .main-wrapper h1 {
     text-align: center;
     font-family: 'Roboto Mono', monospace;
     color: royalblue;
-    text-decoration: underline solid 2px;
 }
 
 .main-wrapper h2 {

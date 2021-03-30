@@ -102,7 +102,11 @@ class Auth extends React.Component {
         return (
             <div className='backdrop'>
                 <div className='user-window'>
-                    <CloseButton className='close-form-btn' title="close" />
+                    <CloseButton 
+                    className='close-form-btn' 
+                    title="close" 
+                    onClose={this.props.closeModal}
+                    />
                     <h2 className="warning-header">Log in to not loose you data!</h2>
                     <form onSubmit={this.submitHandler}>
                         {generateForms}
@@ -116,12 +120,11 @@ class Auth extends React.Component {
                                 className='button button-register'
                                 // btnType={this.state.isFormValid ? 'Success' : 'Disabled'}
                                 disabled={!this.state.isFormValid}>REGISTER</Button>
-                            <Button
-                                className='button button-dismiss-warning'
-                                // btnType={this.state.isFormValid ? 'Success' : 'Disabled'}
-                                disabled={!this.state.isFormValid}>I'm ok</Button>
                         </div>
                     </form>
+                    <Button
+                                className='button button-dismiss-warning'
+                                click={this.props.closeModal}>I'm ok</Button>
                 </div>
             </div>
         )
