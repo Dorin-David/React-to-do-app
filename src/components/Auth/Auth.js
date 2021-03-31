@@ -2,54 +2,49 @@ import React, { useState } from 'react';
 import Input from '../UI/Input/Input';
 import Button from '../UI/Button/button'
 import CloseButton from '../UI/closeButton/closeButton';
-import { handleErrorMessage, validateFormValue } from '../../authUtils';
+// import Spinner from '../UI/Spinner/Spinner';
+
 import './Auth.css'
+import useAuth from '../../hooks/authHelper';
 
+const Auth = props => {
 
-// const Auth = props => {
-
-// }
-
-class Auth extends React.Component {
-
-    state = {
-        controls: {
-            email: {
-                elementType: 'email',
-                elementConfig: {
-                    type: 'text',
-                    placeholder: 'E-mail'
-                },
-                value: '',
-                validation: {
-                    required: true,
-                    isEmail: true
-                },
-                valid: false,
-                triggered: false
+    const [controls, setControls] = useState({
+        email: {
+            elementType: 'email',
+            elementConfig: {
+                type: 'text',
+                placeholder: 'E-mail'
             },
-            password: {
-                elementType: 'input',
-                elementConfig: {
-                    type: 'password',
-                    placeholder: 'Password'
-                },
-                value: '',
-                validation: {
-                    required: true,
-                    minLength: 6,
-                    isAlphaNumeric: false
-                },
-                valid: false,
-                triggered: false
+            value: '',
+            validation: {
+                required: true,
+                isEmail: true
             },
+            valid: false,
+            triggered: false
         },
-    }
+        password: {
+            elementType: 'input',
+            elementConfig: {
+                type: 'password',
+                placeholder: 'Password'
+            },
+            value: '',
+            validation: {
+                required: true,
+                minLength: 6,
+            },
+            valid: false,
+            triggered: false
+        },
+    })
+    const [isFormValid, setFormValidity] = useState(false);
 
+    const handleInputChange = (event, id) => {
 
-    handleInputChange = (event, id) => {
         let copyForm = {
-            ...this.state.controls
+            ...controls
         }
         let updatedValue = {
             ...copyForm[id]
@@ -59,79 +54,86 @@ class Auth extends React.Component {
         updatedValue.triggered = true;
         copyForm[id] = updatedValue;
 
-
         let isFormValid = true;
 
         for (let key in copyForm) {
             isFormValid = copyForm[key].valid && isFormValid
         }
 
-        this.setState({
-            controls: copyForm,
-            isFormValid,
-            errorMessage: null
-        })
+        setControls(copyForm)
+        setFormValidity(isFormValid)
+        //do we need the below?
+        // setErrorMessage(null)
     }
 
-    submitHandler = event => {
-        event.preventDefault()
-        const email = this.state.controls.email.value;
-        const password = this.state.controls.password.value;
-        this.props.authenticateUser(email, password, this.state.isSignedUp);
-    }
-
-    render() {
-        const formElements = [];
-        for (let key in this.state.controls) {
-            formElements.push({ key, data: this.state.controls[key] })
+    const validateFormValue = (value, rules) => {
+        let isValid = true;
+        if (rules.required) {
+            isValid = value.trim() !== '' && isValid
         }
-        let generateForms = formElements.map(form => {
-            return (
-                <Input
-                    key={form.key}
-                    elementType={form.data.elementType}
-                    elementConfig={form.data.elementConfig}
-                    value={form.data.value}
-                    invalid={!form.data.valid}
-                    shouldValidate={form.data.validation}
-                    triggered={form.data.triggered}
-                    handleChange={(event) => this.handleInputChange(event, form.key)}
-                />
-            )
-        })
-        return (
-            <div className='backdrop'>
-                <div className='user-window'>
-                    <CloseButton 
-                    className='close-form-btn' 
-                    title="close" 
-                    onClose={this.props.closeModal}
-                    />
-                    <h2 className="warning-header">Log in to not loose you data!</h2>
-                    <form onSubmit={this.submitHandler}>
-                        {generateForms}
-                        {/* {errorMessage} */}
-                        <div className='btn-wrapper'>
-                            <Button
-                                // btnType={this.state.isFormValid ? 'Success' : 'Disabled'}
-                                className='button button-log-in'
-                                disabled={!this.state.isFormValid}>LOG IN</Button>
-                            <Button
-                                className='button button-register'
-                                // btnType={this.state.isFormValid ? 'Success' : 'Disabled'}
-                                disabled={!this.state.isFormValid}>REGISTER</Button>
-                        </div>
-                    </form>
-                    <Button
-                                className='button button-dismiss-warning'
-                                click={this.props.closeModal}>I'm ok</Button>
-                </div>
-            </div>
-        )
+        if (rules.minLength) {
+            isValid = value.length >= rules.minLength && isValid
+        }
+        if(rules.isEmail){
+            isValid = /\w{3,}@\w+\.\w{2,}/.test(value) && isValid
+        }
+        return isValid
     }
 
+    const submitHandler = (event, command) => {
+        event.preventDefault()
+        const email = controls.email.value;
+        const password = controls.password.value;
+        props.submitAuth(email, password, command)
+    }
 
+    const formElements = [];
+    for (let key in controls) {
+        formElements.push({ key, data: controls[key] })
+    }
+    let generateForms = formElements.map(form => {
+        return (
+            <Input
+                key={form.key}
+                elementType={form.data.elementType}
+                elementConfig={form.data.elementConfig}
+                value={form.data.value}
+                invalid={!form.data.valid}
+                shouldValidate={form.data.validation}
+                triggered={form.data.triggered}
+                handleChange={(event) => handleInputChange(event, form.key)}
+            />
+        )
+    })
+    return (
+        <div className='backdrop'>
+            <div className='user-window'>
+                <CloseButton
+                    className='close-form-btn'
+                    title="close"
+                    onClose={props.closeModal}
+                />
+                <h2 className="warning-header">Log in to not loose you data!</h2>
+                <form>
+                    {generateForms}
+                    <div className='btn-wrapper'>
+                        <Button
+                            className={'button button-log-in' + (!isFormValid ? ' disabled' : '')}
+                            click={event => submitHandler(event, null)}
+                            disabled={!isFormValid}
+                            >LOG IN</Button>
+                        <Button
+                            className={'button button-register'+ (!isFormValid ? ' disabled' : '') }
+                            click={event => submitHandler(event, 'register')}
+                            disabled={!isFormValid}>REGISTER</Button>
+                    </div>
+                </form>
+                <Button
+                    className='button button-dismiss-warning'
+                    click={props.closeModal}>I'm ok</Button>
+            </div>
+        </div>
+    )
 }
-
 
 export default Auth

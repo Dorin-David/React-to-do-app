@@ -41,7 +41,7 @@ const input = props => {
             break;
     }
     return (
-        <label className=''>
+        <label>
             {inputElement}
         </label>)
 }
