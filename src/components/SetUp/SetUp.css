@@ -13,10 +13,11 @@
     padding: 5px 10px;
     color: #4b4848;
     font-size: 1rem;
+    outline: none;
 }
 
 .interaction-wrapper button {
-    flex: 0 1 90px;
+    flex: 1 0 100px;
     border: 2px solid lightblue;
     border-radius: 3px;
     padding: 5px;
@@ -40,5 +41,15 @@
     }
     .main-wrapper h1 {
         font-size: 1.5rem;
+    }
+}
+
+@media screen and (max-width: 550px){
+    .interaction-wrapper {
+        flex-wrap: wrap;
+    }
+    .interaction-wrapper button {
+        flex: 0 0 180px;
+        margin: 5px auto;
     }
 }

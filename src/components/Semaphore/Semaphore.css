@@ -29,3 +29,10 @@
     cursor: pointer;
     opacity: 1;
 }
+
+@media screen and (max-width: 550px){
+    .semaphore {
+        display: flex;
+        margin: 5px auto;
+    }
+}

@@ -1,0 +1,13 @@
+.log-out-button {
+    position: absolute;
+    top: 5px;
+    right: 20px;
+    z-index: 200;
+    font-size: 2.5rem;
+    color: rgb(228, 89, 65);
+}
+
+.log-out-button:hover {
+    cursor: pointer;
+    color: rgb(236, 102, 78);
+}
