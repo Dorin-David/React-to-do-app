@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import Input from '../UI/Input/Input';
 import Button from '../UI/Button/button'
 import CloseButton from '../UI/closeButton/closeButton';
-// import Spinner from '../UI/Spinner/Spinner';
-
 import './Auth.css'
-import useAuth from '../../hooks/authHelper';
 
 const Auth = props => {
 
@@ -116,6 +113,7 @@ const Auth = props => {
                 <h2 className="warning-header">Log in to not loose you data!</h2>
                 <form>
                     {generateForms}
+                    <p className='form-error-message'>{props.errorMessage}</p>
                     <div className='btn-wrapper'>
                         <Button
                             className={'button button-log-in' + (!isFormValid ? ' disabled' : '')}

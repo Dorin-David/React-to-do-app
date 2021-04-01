@@ -41,9 +41,18 @@
 }
 
 .warning-header {
+    font-family: 'Roboto Mono', Arial, Helvetica, sans-serif;
+    text-align: center;
     color: royalblue;
     letter-spacing: .5px;
+    
+}
+
+.form-error-message {
+    font-weight: bold;
+    font-family: 'Roboto Mono', Arial, Helvetica, sans-serif;
     text-align: center;
+    color: #d9534f;
 }
 
 form {

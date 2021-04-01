@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useReducer, useCallback } from 'react';
 import axios from 'axios';
 
 function handleErrorMessage(error) {
@@ -21,7 +21,6 @@ const initialState = {
 }
 
 const authReducer = (state, action) => {
-
     switch (action.type) {
         case "AUTH_START":
             return {
@@ -47,7 +46,8 @@ const authReducer = (state, action) => {
             return {
                 ...state,
                 token: null,
-                userId: null
+                userId: null,
+                error: null
             }
         default:
             return initialState
@@ -57,39 +57,38 @@ const authReducer = (state, action) => {
 const useAuth = () => {
     const [userAuthState, dispatch] = useReducer(authReducer, initialState)
 
-    const authStart = () => ({
+    const authStart = useCallback(() => dispatch({
         type: "AUTH_START"
-    })
+    }), [])
 
-    const authSuccess = (token, userId) => ({
+    const authSuccess = useCallback((token, userId) => dispatch({
         type: "AUTH_SUCCESS",
         token,
         userId
-    })
+    }), [])
 
-    const authFail = error => ({
+    const authFail = useCallback(error => dispatch({
         type: "AUTH_FAIL",
         error
-    })
+    }), [])
 
-    const logout = () => {
+    const logout = useCallback(() => {
         localStorage.removeItem('token');
         localStorage.removeItem('expirationDate')
         localStorage.removeItem('userId')
-        return {
+          dispatch({
             type: "AUTH_LOGOUT"
-        }
-    }
+        })
+    }, [])
 
-    //implement auto logout when token expires
-    const checkAuthTimeout = expirationTime => {
+    const checkAuthTimeout = useCallback(expirationTime => {
         setTimeout(() => {
-            dispatch(logout())
+            logout()
         }, expirationTime * 1000);
-    }
+    }, [logout])
 
-    const auth = (email, password, command) => {
-        dispatch(authStart())
+    const auth = useCallback((email, password, command) => {
+        authStart()
         const authData = {
             email,
             password,
@@ -100,41 +99,41 @@ const useAuth = () => {
             url = 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCL98oN6nr0uECgFWmhT6hYOLrAFsusX88'
         } 
 
-        console.log('[authHelper] triggered with', url, authData)
         axios.post(url, authData)
             .then(res => {
                 const expirationDate = new Date(new Date().getTime() + res.data.expiresIn * 1000);
                 localStorage.setItem('token', res.data.idToken);
                 localStorage.setItem('expirationDate', expirationDate);
                 localStorage.setItem('userId', res.data.localId)
-                dispatch(authSuccess(res.data.idToken, res.data.localId))
-                dispatch(checkAuthTimeout(res.data.expiresIn))
+                authSuccess(res.data.idToken, res.data.localId)
+                checkAuthTimeout(res.data.expiresIn)
             })
             .catch(rej => {
-                dispatch(authFail(rej.response.data.error))
+                authFail(rej.response.data.error)
             })
-    }
+    }, [authStart,authSuccess, authFail, checkAuthTimeout])
 
-    const authCheckState = () => {
+    const authCheckState = useCallback(() => {
         const token = localStorage.getItem('token');
         if (!token) {
-            dispatch(logout())
+            logout()
         } else {
             const expirationDate = new Date(localStorage.getItem('expirationDate'));
             if (expirationDate <= new Date()) {
-                dispatch(logout())
+                logout()
             } else {
                 const userId = localStorage.getItem('userId')
-                dispatch(authSuccess(token, userId))
-                dispatch(checkAuthTimeout((expirationDate.getTime() - new Date().getTime() / 1000)))
+                authSuccess(token, userId)
+                checkAuthTimeout((expirationDate.getTime() - new Date().getTime() / 1000))
             }
         }
-    }
+    },[logout, authSuccess, checkAuthTimeout])
 
     return {
         userAuthState,
         auth,
-        authCheckState
+        authCheckState,
+        logout
     }
 
 }
