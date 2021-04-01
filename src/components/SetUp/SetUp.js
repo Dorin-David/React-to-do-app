@@ -1,12 +1,12 @@
-import React, { Fragment, useState } from 'react';
-import Card from '../Card/Card';
+import React, { Fragment, useState, useEffect } from 'react';
+import Cards from '../Card/Cards';
 import FilterButtons from '../Filter/Filter';
 import Semaphore from '../Semaphore/Semaphore';
 import Buttons from '../Buttons/Buttons';
 import ErrorModal from '../UI/ErrorModal/ErrorModal';
+import axios from '../../axios-list';
 
 import './SetUp.css';
-
 
 const SetUp = props => {
 
@@ -17,6 +17,30 @@ const SetUp = props => {
   const [filteredItems, setFilteredItems] = useState([]);
   const [toRenderList, setToRenderList] = useState([]);
   const [error, setError] = useState('')
+
+  const { token, userId } = props;
+
+  useEffect(() => {
+    if (token) {
+      axios.get('/list.json', {
+        params: {
+          auth: token,
+          orderBy: '"userId"',
+          equalTo: `"${userId}"`,
+        }
+      }).then(res => {
+        let list = [];
+        for (let key in res.data) {
+          list.push(res.data[key])
+        }
+        setList(list)
+      }).catch(rej => {
+        console.log(rej)
+      })
+    } else {
+      setList([])
+    }
+  }, [token, userId])
 
   const toggleButtons = () => {
     setButtons(state => ({
@@ -40,11 +64,27 @@ const SetUp = props => {
       toggleButtons();
       return setCurrentTask('')
     }
-
-    setList(currList => [...currList, { info: currTask, color: color }]);
     setToRenderList(currList => [...currList, { info: currTask, color: color }])
     setCurrentTask('');
     toggleButtons();
+
+    if (token) {
+      const dispatchTask = {
+        info: currTask,
+        color: color,
+        userId: userId
+      }
+
+      axios.post('/list.json?auth=' + token, dispatchTask)
+        .then(res => {
+          console.log(res)
+        })
+        .catch(rej => {
+          setError(rej.message)
+        })
+    } else {
+      setList(currList => [...currList, { info: currTask, color: color }]);
+    }
   }
 
   const handleChange = (e) => {
@@ -100,7 +140,7 @@ const SetUp = props => {
 
   return (
     <Fragment >
-      {error && <ErrorModal closeModal={() => setError('')}/>}
+      {error && <ErrorModal closeModal={() => setError('')} />}
       <div className='interaction-wrapper'>
         <input type='text' placeholder="Add new task"
           onChange={handleChange}
@@ -111,7 +151,7 @@ const SetUp = props => {
         {buttons.hideSemaphore ? null : <Semaphore addTOList={addTOList} />}
       </div>
       {list.length >= 1 ? <FilterButtons filterItems={filterItems} style={styleProp} /> : null}
-      <Card
+      <Cards
         list={filteredItems.length === 0 ? list : toRenderList}
         markAsDone={markAsDone}
         editTask={editTask}
