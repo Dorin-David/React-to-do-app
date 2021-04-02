@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, Fragment, useCallback } from 'react';
 import SetUp from './components/SetUp/SetUp';
 import UserIcon from './components/UI/userIcon/userIcon';
 import LogOutIcon from './components/UI/logoutButton/logoutButton';

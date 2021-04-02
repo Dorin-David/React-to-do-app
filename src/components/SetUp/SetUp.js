@@ -30,8 +30,7 @@ const SetUp = props => {
   const { token, userId } = props;
 
   const loadList = useCallback(() => {
-    // console.log('SetUp triggered, token:', token)
-     setLoading(true)
+    setLoading(true)
     axios.get('/list.json', {
       params: {
         auth: token,
@@ -75,25 +74,19 @@ const SetUp = props => {
     toggleButtons();
   }
 
-  const addToList = (color) => {
-    let currTask = currentTask.trim();
-    if (list.find(element => element.info === currTask) || currTask === '') {
-      toggleButtons();
-      return setCurrentTask('')
-    }
-    setToRenderList(currList => [...currList, { info: currTask, color: color }])
-    setCurrentTask('');
-    toggleButtons();
+  const addToList = (color, asyncUpdate) => {
+   console.log(color, asyncUpdate)
 
-    if (token) {
+    if (asyncUpdate) {
       setLoading(true)
-      const dispatchTask = {
-        info: currTask,
-        color: color,
-        userId: userId
-      }
+      // const dispatchTask = {
+      //   info: currTask,
+      //   color: color,
+      //   prevColor: color,
+      //   userId: userId
+      // }
 
-      axios.post('/list.json?auth=' + token, dispatchTask)
+      axios.post('/list.json?auth=' + token, asyncUpdate)
         .then(res => {
           loadList()
         })
@@ -101,6 +94,16 @@ const SetUp = props => {
           setError(rej.message)
         })
     } else {
+      let currTask = currentTask.trim();
+
+      if (list.find(element => element.info === currTask) || currTask === '') {
+        toggleButtons();
+        return setCurrentTask('')
+      }
+
+      setToRenderList(currList => [...currList, { info: currTask, color: color }])
+      setCurrentTask('');
+      toggleButtons();
       setList(currList => [...currList, { info: currTask, color: color }]);
     }
   }
@@ -121,39 +124,50 @@ const SetUp = props => {
     setToRenderList(() => list.filter(el => currentFilteredItems.includes(el.color)))
   }
 
-  const markAsDone = (target) => {
-    //the logic for marking the items as done should be handled when the user logs out
-    // or, rather, when the token is changed
-    let targetIndex = list.findIndex(element => element.info === target)
+  const markAsDone = (syncTarget, asyncTarget) => {
+    let targetIndex = list.findIndex(element => element.info === syncTarget)
     let listCopy = [...list];
+    let targetItem = listCopy[targetIndex];
 
-    if (listCopy[targetIndex].color === 'done') {
-      listCopy[targetIndex] = { info: target, color: list[targetIndex].previousColor }
+    if (targetItem.color === 'done') {
+      targetItem = { ...targetItem, color: list[targetIndex].previousColor }
+    } else {
+      targetItem = { ...targetItem, previousColor: list[targetIndex].color, color: 'done' }
     }
-    else {
-      listCopy[targetIndex] = { info: target, previousColor: list[targetIndex].color, color: 'done' }
+    listCopy[targetIndex] = targetItem
+    console.log(targetItem)
+
+    if (asyncTarget) {
+      deleteTask(syncTarget, asyncTarget, targetItem)
+    } else {
+      setList(listCopy)
     }
-    setList(listCopy)
+
+    
   }
 
   const editTask = (syncTarget, asyncTarget) => {
-     //note below
+    //note below
     deleteTask(syncTarget, asyncTarget)
     setCurrentTask(syncTarget.trim())
   }
 
-  const deleteTask = (syncTarget, asyncTarget) => {
-    if(asyncTarget){
+  const deleteTask = (syncTarget, asyncTarget, updatedObject) => {
+    if (asyncTarget) {
       setLoading(true)
-      axios.delete(`list/${asyncTarget}.json`).then( res => {
-        loadList()
+      axios.delete(`list/${asyncTarget}.json`).then(res => {
+        if(updatedObject){
+          addToList(null, updatedObject)
+        } else {
+          loadList()
+        }
       }).catch(rej => {
         setError(rej.message)
       })
     } else {
       setList(currList => currList.filter(item => item.info !== syncTarget))
     }
-    
+
   }
 
   const styleProp = (target) => {
@@ -197,7 +211,7 @@ const SetUp = props => {
         {buttons.hideAdd ? null : <button onClick={validateInput}>Add</button>}
         {buttons.hideSemaphore ? null : <Semaphore addToList={addToList} />}
       </div>
-        {userInterface}
+      {userInterface}
     </Fragment>
   )
 
