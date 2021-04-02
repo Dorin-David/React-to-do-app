@@ -136,10 +136,10 @@ const SetUp = props => {
     setList(listCopy)
   }
 
-  const editTask = (target) => {
+  const editTask = (syncTarget, asyncTarget) => {
      //note below
-    deleteTask(target)
-    setCurrentTask(target.trim())
+    deleteTask(syncTarget, asyncTarget)
+    setCurrentTask(syncTarget.trim())
   }
 
   const deleteTask = (syncTarget, asyncTarget) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment, useMemo, useCallback } from 'react';
 import SetUp from './components/SetUp/SetUp';
 import UserIcon from './components/UI/userIcon/userIcon';
 import LogOutIcon from './components/UI/logoutButton/logoutButton';
@@ -12,25 +12,19 @@ const App = () => {
   const { userAuthState, auth, authCheckState, logout } = useAuth()
   const { token, userId, error, loading } = userAuthState;
 
-  const toggleUserModal = () => {
+  const toggleUserModal = useCallback(() => {
     setUserModal(userModal => !userModal)
-  }
+  }, [])
 
-  const submitAuth = (email, password, command) => {
-    try {
+  const submitAuth = useCallback((email, password, command) => {
       auth(email, password, command)
-    } catch (e) {
-      alert("An Error occured, please try later")
-      console.log(e.message)
-    }
-  }
+  }, [auth])
 
   useEffect(() => {
-    // if(!token){
-    authCheckState()
-    // console.log('from [App.js], token:')
-    // 
-  }, [token, authCheckState])
+    authCheckState().then(res => {
+      //added Promise to make sure it waits for async response
+    })
+  }, [authCheckState])
 
   let userInterface = (
     <Fragment>
