@@ -1,12 +1,20 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import Cards from '../Card/Cards';
 import FilterButtons from '../Filter/Filter';
 import Semaphore from '../Semaphore/Semaphore';
 import Buttons from '../Buttons/Buttons';
 import ErrorModal from '../UI/ErrorModal/ErrorModal';
+import Spinner from '../UI/Spinner/Spinner';
 import axios from '../../axios-list';
-
 import './SetUp.css';
+
+/*
+  To do:
+   1) logic for deleting an element
+   2) logic for deleting all done elements
+   3) logic for deleting ALL elements (confirm pop-up)
+   
+*/
 
 const SetUp = props => {
 
@@ -17,30 +25,38 @@ const SetUp = props => {
   const [filteredItems, setFilteredItems] = useState([]);
   const [toRenderList, setToRenderList] = useState([]);
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false);
 
   const { token, userId } = props;
 
+  const loadList = useCallback(() => {
+    setLoading(true)
+    axios.get('/list.json', {
+      params: {
+        auth: token,
+        orderBy: '"userId"',
+        equalTo: `"${userId}"`,
+      }
+    }).then(res => {
+      setLoading(false)
+      let list = [];
+      for (let key in res.data) {
+        list.push({ ...res.data[key], itemId: key })
+      }
+      setList(list)
+    }).catch(rej => {
+      setLoading(false)
+      setError(rej.message)
+    })
+  }, [token, userId])
+
   useEffect(() => {
     if (token) {
-      axios.get('/list.json', {
-        params: {
-          auth: token,
-          orderBy: '"userId"',
-          equalTo: `"${userId}"`,
-        }
-      }).then(res => {
-        let list = [];
-        for (let key in res.data) {
-          list.push(res.data[key])
-        }
-        setList(list)
-      }).catch(rej => {
-        console.log(rej)
-      })
+      loadList()
     } else {
       setList([])
     }
-  }, [token, userId])
+  }, [token, userId, loadList])
 
   const toggleButtons = () => {
     setButtons(state => ({
@@ -58,31 +74,36 @@ const SetUp = props => {
     toggleButtons();
   }
 
-  const addTOList = (color) => {
-    let currTask = currentTask.trim();
-    if (list.find(element => element.info === currTask) || currTask === '') {
-      toggleButtons();
-      return setCurrentTask('')
-    }
-    setToRenderList(currList => [...currList, { info: currTask, color: color }])
-    setCurrentTask('');
-    toggleButtons();
+  const addToList = (color, asyncUpdate) => {
+   console.log(color, asyncUpdate)
 
-    if (token) {
-      const dispatchTask = {
-        info: currTask,
-        color: color,
-        userId: userId
-      }
+    if (asyncUpdate) {
+      setLoading(true)
+      // const dispatchTask = {
+      //   info: currTask,
+      //   color: color,
+      //   prevColor: color,
+      //   userId: userId
+      // }
 
-      axios.post('/list.json?auth=' + token, dispatchTask)
+      axios.post('/list.json?auth=' + token, asyncUpdate)
         .then(res => {
-          console.log(res)
+          loadList()
         })
         .catch(rej => {
           setError(rej.message)
         })
     } else {
+      let currTask = currentTask.trim();
+
+      if (list.find(element => element.info === currTask) || currTask === '') {
+        toggleButtons();
+        return setCurrentTask('')
+      }
+
+      setToRenderList(currList => [...currList, { info: currTask, color: color }])
+      setCurrentTask('');
+      toggleButtons();
       setList(currList => [...currList, { info: currTask, color: color }]);
     }
   }
@@ -103,26 +124,50 @@ const SetUp = props => {
     setToRenderList(() => list.filter(el => currentFilteredItems.includes(el.color)))
   }
 
-  const markAsDone = (target) => {
-    let targetIndex = list.findIndex(element => element.info === target)
+  const markAsDone = (syncTarget, asyncTarget) => {
+    let targetIndex = list.findIndex(element => element.info === syncTarget)
     let listCopy = [...list];
+    let targetItem = listCopy[targetIndex];
 
-    if (listCopy[targetIndex].color === 'done') {
-      listCopy[targetIndex] = { info: target, color: list[targetIndex].previousColor }
+    if (targetItem.color === 'done') {
+      targetItem = { ...targetItem, color: list[targetIndex].previousColor }
+    } else {
+      targetItem = { ...targetItem, previousColor: list[targetIndex].color, color: 'done' }
     }
-    else {
-      listCopy[targetIndex] = { info: target, previousColor: list[targetIndex].color, color: 'done' }
+    listCopy[targetIndex] = targetItem
+    console.log(targetItem)
+
+    if (asyncTarget) {
+      deleteTask(syncTarget, asyncTarget, targetItem)
+    } else {
+      setList(listCopy)
     }
-    setList(listCopy)
+
+    
   }
 
-  const editTask = (target) => {
-    deleteTask(target)
-    setCurrentTask(target.trim())
+  const editTask = (syncTarget, asyncTarget) => {
+    //note below
+    deleteTask(syncTarget, asyncTarget)
+    setCurrentTask(syncTarget.trim())
   }
 
-  const deleteTask = (target) => {
-    setList(currList => currList.filter(item => item.info !== target))
+  const deleteTask = (syncTarget, asyncTarget, updatedObject) => {
+    if (asyncTarget) {
+      setLoading(true)
+      axios.delete(`list/${asyncTarget}.json`).then(res => {
+        if(updatedObject){
+          addToList(null, updatedObject)
+        } else {
+          loadList()
+        }
+      }).catch(rej => {
+        setError(rej.message)
+      })
+    } else {
+      setList(currList => currList.filter(item => item.info !== syncTarget))
+    }
+
   }
 
   const styleProp = (target) => {
@@ -138,6 +183,22 @@ const SetUp = props => {
     }
   }
 
+  let userInterface = <Spinner />
+  if (!loading) {
+    userInterface = (
+      <Fragment>
+        {list.length >= 1 ? <FilterButtons filterItems={filterItems} style={styleProp} /> : null}
+        <Cards
+          list={filteredItems.length === 0 ? list : toRenderList}
+          markAsDone={markAsDone}
+          editTask={editTask}
+          deleteTask={deleteTask} />
+        {list.length >= 1 ? <Buttons clearList={clearList} /> : <h2>Add some great stuff!</h2>}
+      </Fragment>
+    )
+  }
+
+
   return (
     <Fragment >
       {error && <ErrorModal closeModal={() => setError('')} />}
@@ -148,15 +209,9 @@ const SetUp = props => {
           style={warningMessage ? { border: '3px solid red', color: 'tomato', fontWeight: 'bold' } : null}
         />
         {buttons.hideAdd ? null : <button onClick={validateInput}>Add</button>}
-        {buttons.hideSemaphore ? null : <Semaphore addTOList={addTOList} />}
+        {buttons.hideSemaphore ? null : <Semaphore addToList={addToList} />}
       </div>
-      {list.length >= 1 ? <FilterButtons filterItems={filterItems} style={styleProp} /> : null}
-      <Cards
-        list={filteredItems.length === 0 ? list : toRenderList}
-        markAsDone={markAsDone}
-        editTask={editTask}
-        deleteTask={deleteTask} />
-      {list.length >= 1 ? <Buttons clearList={clearList} /> : <h2>Add some great stuff!</h2>}
+      {userInterface}
     </Fragment>
   )
 

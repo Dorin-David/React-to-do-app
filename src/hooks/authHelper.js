@@ -115,18 +115,25 @@ const useAuth = () => {
 
     const authCheckState = useCallback(() => {
         const token = localStorage.getItem('token');
-        if (!token) {
-            logout()
-        } else {
-            const expirationDate = new Date(localStorage.getItem('expirationDate'));
-            if (expirationDate <= new Date()) {
+        // console.log('[authHelper triggerd]', token)
+        
+        return new Promise((res, rej) => {
+            if (!token) {
                 logout()
+                 return res('logged out')
             } else {
-                const userId = localStorage.getItem('userId')
-                authSuccess(token, userId)
-                checkAuthTimeout((expirationDate.getTime() - new Date().getTime() / 1000))
+                const expirationDate = new Date(localStorage.getItem('expirationDate'));
+                if (expirationDate <= new Date()) {
+                    logout()
+                } else {
+                    const userId = localStorage.getItem('userId')
+                    authSuccess(token, userId)
+                    checkAuthTimeout((expirationDate.getTime() - new Date().getTime() / 1000))
+                    res('logged in')
+                }
             }
-        }
+
+        })
     },[logout, authSuccess, checkAuthTimeout])
 
     return {
