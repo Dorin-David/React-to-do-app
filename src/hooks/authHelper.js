@@ -115,6 +115,7 @@ const useAuth = () => {
 
     const authCheckState = useCallback(() => {
         const token = localStorage.getItem('token');
+        // console.log('[authHelper triggerd]')
         if (!token) {
             logout()
         } else {

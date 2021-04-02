@@ -26,9 +26,10 @@ const App = () => {
   }
 
   useEffect(() => {
-    if (!token) {
-      authCheckState()
-    }
+    // if(!token){
+    authCheckState()
+    // console.log('from [App.js], token:')
+    // 
   }, [token, authCheckState])
 
   let userInterface = (
