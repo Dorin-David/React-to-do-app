@@ -35,7 +35,7 @@ const SetUp = props => {
       for (let key in res.data) {
         list.push({ ...res.data[key], itemId: key })
       }
-      setList(list)
+      setList(list.sort((a, b) => new Date(a.date) - new Date(b.date)))
     }).catch(rej => {
       setLoading(false)
       setError(rej.message)
@@ -68,20 +68,25 @@ const SetUp = props => {
 
   const addToList = (color, asyncUpdate) => {
     const currTask = currentTask.trim();
-    if (list.find(element => element.info === currTask) || currTask === '') {
-      toggleButtons();
-      return setCurrentTask('')
+    if(!asyncUpdate){
+      if (list.find(element => element.info === currTask) || currTask === '') {
+        toggleButtons();
+        return setCurrentTask('')
+      }
     }
-
+    
     if (token) {
       setLoading(true)
       const dispatchTask = {
         info: currTask,
         color: color,
         prevColor: color,
-        userId: userId
+        userId: userId,
+        date: new Date()
+      } 
+      if(color){
+        toggleButtons()
       }
-
       axios.post('/list.json?auth=' + token, (asyncUpdate || dispatchTask))
         .then(res => {
           loadList()
@@ -92,9 +97,10 @@ const SetUp = props => {
     } else {
       setToRenderList(currList => [...currList, { info: currTask, color: color }])
       setList(currList => [...currList, { info: currTask, color: color }]);
+      toggleButtons();
     }
+  
     setCurrentTask('');
-    toggleButtons();
   }
 
   const handleChange = (e) => {
@@ -124,7 +130,6 @@ const SetUp = props => {
       targetItem = { ...targetItem, previousColor: list[targetIndex].color, color: 'done' }
     }
     listCopy[targetIndex] = targetItem
-
     if (asyncTarget) {
       deleteTask(syncTarget, asyncTarget, targetItem)
     } else {
@@ -144,7 +149,7 @@ const SetUp = props => {
       setLoading(true)
       axios.delete(`list/${asyncTarget}.json`).then(res => {
         if (updatedObject) {
-          addToList(null, updatedObject)
+         addToList(null, updatedObject)
         } else {
           loadList()
         }
