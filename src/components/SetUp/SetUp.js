@@ -8,14 +8,6 @@ import Spinner from '../UI/Spinner/Spinner';
 import axios from '../../axios-list';
 import './SetUp.css';
 
-/*
-  To do:
-   1) logic for deleting an element
-   2) logic for deleting all done elements
-   3) logic for deleting ALL elements (confirm pop-up)
-   
-*/
-
 const SetUp = props => {
 
   const [buttons, setButtons] = useState({ hideAdd: false, hideSemaphore: true });
@@ -43,7 +35,7 @@ const SetUp = props => {
       for (let key in res.data) {
         list.push({ ...res.data[key], itemId: key })
       }
-      setList(list)
+      setList(list.sort((a, b) => new Date(a.date) - new Date(b.date)))
     }).catch(rej => {
       setLoading(false)
       setError(rej.message)
@@ -75,18 +67,27 @@ const SetUp = props => {
   }
 
   const addToList = (color, asyncUpdate) => {
-   console.log(color, asyncUpdate)
-
-    if (asyncUpdate) {
+    const currTask = currentTask.trim();
+    if(!asyncUpdate){
+      if (list.find(element => element.info === currTask) || currTask === '') {
+        toggleButtons();
+        return setCurrentTask('')
+      }
+    }
+    
+    if (token) {
       setLoading(true)
-      // const dispatchTask = {
-      //   info: currTask,
-      //   color: color,
-      //   prevColor: color,
-      //   userId: userId
-      // }
-
-      axios.post('/list.json?auth=' + token, asyncUpdate)
+      const dispatchTask = {
+        info: currTask,
+        color: color,
+        prevColor: color,
+        userId: userId,
+        date: new Date()
+      } 
+      if(color){
+        toggleButtons()
+      }
+      axios.post('/list.json?auth=' + token, (asyncUpdate || dispatchTask))
         .then(res => {
           loadList()
         })
@@ -94,18 +95,12 @@ const SetUp = props => {
           setError(rej.message)
         })
     } else {
-      let currTask = currentTask.trim();
-
-      if (list.find(element => element.info === currTask) || currTask === '') {
-        toggleButtons();
-        return setCurrentTask('')
-      }
-
       setToRenderList(currList => [...currList, { info: currTask, color: color }])
-      setCurrentTask('');
-      toggleButtons();
       setList(currList => [...currList, { info: currTask, color: color }]);
+      toggleButtons();
     }
+  
+    setCurrentTask('');
   }
 
   const handleChange = (e) => {
@@ -135,19 +130,16 @@ const SetUp = props => {
       targetItem = { ...targetItem, previousColor: list[targetIndex].color, color: 'done' }
     }
     listCopy[targetIndex] = targetItem
-    console.log(targetItem)
-
     if (asyncTarget) {
       deleteTask(syncTarget, asyncTarget, targetItem)
     } else {
       setList(listCopy)
     }
 
-    
+
   }
 
   const editTask = (syncTarget, asyncTarget) => {
-    //note below
     deleteTask(syncTarget, asyncTarget)
     setCurrentTask(syncTarget.trim())
   }
@@ -156,8 +148,8 @@ const SetUp = props => {
     if (asyncTarget) {
       setLoading(true)
       axios.delete(`list/${asyncTarget}.json`).then(res => {
-        if(updatedObject){
-          addToList(null, updatedObject)
+        if (updatedObject) {
+         addToList(null, updatedObject)
         } else {
           loadList()
         }
@@ -183,6 +175,25 @@ const SetUp = props => {
     }
   }
 
+  const test = () => {
+    const pendingList = list.filter(el => el.color !== 'done')
+    axios.delete(`list.json`).then(res => {
+        let updatedList = {}
+
+        for(let item of pendingList){
+          updatedList[item.itemId]= item
+        }
+         console.log('delete is done')
+         console.log(pendingList)
+      // return axios.post('/list.json?auth=' + token, { ...pendingList }).then(res => {
+      //   console.log('posting is done')
+      //   loadList()
+      // })
+    })
+
+
+  }
+
   let userInterface = <Spinner />
   if (!loading) {
     userInterface = (
@@ -193,7 +204,7 @@ const SetUp = props => {
           markAsDone={markAsDone}
           editTask={editTask}
           deleteTask={deleteTask} />
-        {list.length >= 1 ? <Buttons clearList={clearList} /> : <h2>Add some great stuff!</h2>}
+        {list.length >= 1 ? <Buttons clearList={test} /> : <h2>Add some great stuff!</h2>}
       </Fragment>
     )
   }
